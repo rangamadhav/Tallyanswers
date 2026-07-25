@@ -12,6 +12,7 @@
       --text-color: #f8fafc;
       --cell-bg: #0f172a;
       --cell-border: #334155;
+      --selected-border: #f59e0b;
     }
 
     * {
@@ -36,11 +37,11 @@
       border-radius: 16px;
       padding: 24px;
       width: 100%;
-      max-width: 650px;
+      max-width: 680px;
       box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5);
       display: flex;
       flex-direction: column;
-      gap: 20px;
+      gap: 16px;
     }
 
     h1 {
@@ -55,7 +56,7 @@
       flex-wrap: wrap;
       gap: 12px;
       background: rgba(0, 0, 0, 0.2);
-      padding: 16px;
+      padding: 14px;
       border-radius: 10px;
       align-items: center;
       justify-content: space-between;
@@ -68,7 +69,7 @@
     }
 
     label {
-      font-size: 0.9rem;
+      font-size: 0.85rem;
       color: #94a3b8;
     }
 
@@ -76,49 +77,94 @@
       background-color: var(--cell-bg);
       color: var(--text-color);
       border: 1px solid var(--cell-border);
-      padding: 8px 12px;
+      padding: 6px 10px;
       border-radius: 6px;
-      font-size: 0.95rem;
+      font-size: 0.9rem;
       outline: none;
     }
 
-    select:focus, input:focus {
-      border-color: var(--accent-color);
+    /* Toggle Switch */
+    .switch {
+      position: relative;
+      display: inline-block;
+      width: 40px;
+      height: 22px;
+    }
+
+    .switch input {
+      opacity: 0;
+      width: 0;
+      height: 0;
+    }
+
+    .slider {
+      position: absolute;
+      cursor: pointer;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background-color: #334155;
+      transition: .3s;
+      border-radius: 22px;
+    }
+
+    .slider:before {
+      position: absolute;
+      content: "";
+      height: 16px;
+      width: 16px;
+      left: 3px;
+      bottom: 3px;
+      background-color: white;
+      transition: .3s;
+      border-radius: 50%;
+    }
+
+    input:checked + .slider {
+      background-color: var(--accent-color);
+    }
+
+    input:checked + .slider:before {
+      transform: translateX(18px);
     }
 
     .start-btn {
       background-color: #10b981;
       color: white;
       border: none;
-      padding: 8px 16px;
+      padding: 6px 12px;
       border-radius: 6px;
       cursor: pointer;
       font-weight: bold;
-      transition: background 0.2s;
-    }
-
-    .start-btn:hover {
-      background-color: #059669;
     }
 
     .undo-top-btn {
-      background-color: #f59e0b;
+      background-color: #ef4444;
       color: white;
       border: none;
-      padding: 8px 16px;
+      padding: 6px 12px;
       border-radius: 6px;
       cursor: pointer;
       font-weight: bold;
-      transition: background 0.2s;
     }
 
-    .undo-top-btn:hover {
-      background-color: #d97706;
+    /* Live Timer Banner */
+    .timer-display {
+      text-align: center;
+      font-family: monospace;
+      font-size: 0.9rem;
+      color: #38bdf8;
+      background: rgba(56, 189, 248, 0.08);
+      padding: 6px;
+      border-radius: 6px;
+      display: none;
+    }
+
+    .timer-display.active {
+      display: block;
     }
 
     /* 10x5 Matrix Display */
     .matrix-viewport {
-      height: 380px; /* Fits exactly 10 rows before scrolling */
+      height: 380px;
       overflow-y: auto;
       border: 2px solid var(--cell-border);
       border-radius: 8px;
@@ -135,14 +181,28 @@
     .matrix-cell {
       background-color: rgba(255, 255, 255, 0.03);
       border: 1px solid rgba(255, 255, 255, 0.07);
-      border-radius: 4px;
-      height: 32px;
+      border-radius: 6px;
+      height: 34px;
       display: flex;
       align-items: center;
-      padding: 0 8px;
-      font-size: 0.85rem;
+      justify-content: space-between;
+      padding: 0 6px;
+      font-size: 0.8rem;
       font-family: monospace;
       color: #64748b;
+      cursor: pointer;
+      user-select: none;
+      transition: border-color 0.15s, background-color 0.15s;
+    }
+
+    .matrix-cell:hover {
+      border-color: rgba(56, 189, 248, 0.4);
+    }
+
+    .matrix-cell.selected {
+      border: 2px solid var(--selected-border) !important;
+      background-color: rgba(245, 158, 11, 0.15) !important;
+      box-shadow: 0 0 8px rgba(245, 158, 11, 0.3);
     }
 
     .matrix-cell.filled {
@@ -151,15 +211,26 @@
       background-color: rgba(56, 189, 248, 0.1);
     }
 
+    .cell-left {
+      display: flex;
+      align-items: center;
+      gap: 3px;
+    }
+
     .matrix-cell .q-num {
       font-weight: bold;
-      margin-right: 4px;
       color: #94a3b8;
     }
 
     .matrix-cell .ans {
       color: #f59e0b;
       font-weight: bold;
+    }
+
+    .matrix-cell .time-tag {
+      font-size: 0.68rem;
+      color: #38bdf8;
+      opacity: 0.9;
     }
 
     /* Controls Section */
@@ -173,53 +244,33 @@
       background-color: #3b82f6;
       color: white;
       border: none;
-      padding: 16px 0;
-      font-size: 1.25rem;
+      padding: 14px 0;
+      font-size: 1.2rem;
       font-weight: bold;
       border-radius: 8px;
       cursor: pointer;
       box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
-      transition: transform 0.1s, background-color 0.2s;
     }
 
     .tally-btn:active {
       transform: scale(0.95);
     }
 
-    .tally-btn:disabled {
-      background-color: #334155;
-      cursor: not-allowed;
-      opacity: 0.5;
-    }
-
-    .back-btn {
+    .clear-btn {
       background-color: #ef4444;
       color: white;
       border: none;
-      padding: 16px 0;
-      font-size: 1rem;
+      padding: 14px 0;
+      font-size: 0.95rem;
       font-weight: bold;
       border-radius: 8px;
       cursor: pointer;
-      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
-      transition: transform 0.1s, background-color 0.2s;
     }
 
-    .back-btn:active {
-      transform: scale(0.95);
-    }
-
-    /* Scrollbar Styling */
-    .matrix-viewport::-webkit-scrollbar {
-      width: 8px;
-    }
-    .matrix-viewport::-webkit-scrollbar-track {
-      background: var(--cell-bg);
-    }
-    .matrix-viewport::-webkit-scrollbar-thumb {
-      background: var(--cell-border);
-      border-radius: 4px;
-    }
+    /* Scrollbar */
+    .matrix-viewport::-webkit-scrollbar { width: 8px; }
+    .matrix-viewport::-webkit-scrollbar-track { background: var(--cell-bg); }
+    .matrix-viewport::-webkit-scrollbar-thumb { background: var(--cell-border); border-radius: 4px; }
   </style>
 </head>
 <body>
@@ -231,7 +282,7 @@
   <div class="config-panel">
     <div class="config-group">
       <label for="formatSelect">Format:</label>
-      <select id="formatSelect">
+      <select id="formatSelect" onchange="updateFormat()">
         <option value="ABCD">A, B, C, D</option>
         <option value="1234">1, 2, 3, 4</option>
       </select>
@@ -239,34 +290,51 @@
 
     <div class="config-group">
       <label for="startQ">Start Q#:</label>
-      <input type="number" id="startQ" value="6" min="1" style="width: 65px;">
+      <input type="number" id="startQ" value="1" min="1" style="width: 55px;">
+    </div>
+
+    <div class="config-group">
+      <label for="timerToggle">Timer:</label>
+      <label class="switch">
+        <input type="checkbox" id="timerToggle" onchange="toggleTimer()">
+        <span class="slider"></span>
+      </label>
     </div>
 
     <button class="start-btn" onclick="initializeTally()">Reset</button>
-    <button class="undo-top-btn" onclick="undoLastAnswer()">⌫ Undo</button>
   </div>
 
-  <!-- 10x5 Matrix Screen (Scrolls up to 100 entries) -->
+  <!-- Live Time Tracker -->
+  <div class="timer-display" id="timerDisplay">
+    ⏱ Question Timer: <span id="timeElapsed">0s</span>
+  </div>
+
+  <!-- 10x5 Matrix Screen -->
   <div class="matrix-viewport" id="viewport">
     <div class="matrix-grid" id="matrixGrid"></div>
   </div>
 
   <!-- Lower Input Buttons -->
   <div class="buttons-grid">
-    <button class="tally-btn" id="btn1" onclick="submitAnswer(0)" disabled>A</button>
-    <button class="tally-btn" id="btn2" onclick="submitAnswer(1)" disabled>B</button>
-    <button class="tally-btn" id="btn3" onclick="submitAnswer(2)" disabled>C</button>
-    <button class="tally-btn" id="btn4" onclick="submitAnswer(3)" disabled>D</button>
-    <button class="back-btn" id="btnUndo" onclick="undoLastAnswer()">⌫ Back</button>
+    <button class="tally-btn" id="btn1" onclick="submitAnswer(0)">A</button>
+    <button class="tally-btn" id="btn2" onclick="submitAnswer(1)">B</button>
+    <button class="tally-btn" id="btn3" onclick="submitAnswer(2)">C</button>
+    <button class="tally-btn" id="btn4" onclick="submitAnswer(3)">D</button>
+    <button class="clear-btn" onclick="clearSelectedCell()">Erase</button>
   </div>
 </div>
 
 <script>
   let currentFormat = "ABCD";
-  let startQuestionNum = 6;
-  let currentAnswerIndex = 0;
-  const TOTAL_CELLS = 100; // Total capacity (2 full screens of 50)
+  let startQuestionNum = 1;
+  let selectedIndex = 0;
+  const TOTAL_CELLS = 100;
   
+  // Timing variables
+  let timerInterval = null;
+  let startTime = null;
+  let cellTimes = new Array(TOTAL_CELLS).fill(null);
+
   const optionSets = {
     "ABCD": ["A", "B", "C", "D"],
     "1234": ["1", "2", "3", "4"]
@@ -275,17 +343,12 @@
   function initializeTally() {
     currentFormat = document.getElementById('formatSelect').value;
     startQuestionNum = parseInt(document.getElementById('startQ').value) || 1;
-    currentAnswerIndex = 0;
+    selectedIndex = 0;
+    cellTimes = new Array(TOTAL_CELLS).fill(null);
 
-    // Update button labels according to selected format
-    const labels = optionSets[currentFormat];
-    for (let i = 0; i < 4; i++) {
-      const btn = document.getElementById(`btn${i+1}`);
-      btn.innerText = labels[i];
-      btn.disabled = false;
-    }
+    updateFormat();
 
-    // Build the 100-cell matrix grid
+    // Build grid
     const grid = document.getElementById('matrixGrid');
     grid.innerHTML = '';
 
@@ -293,70 +356,129 @@
       const cell = document.createElement('div');
       cell.className = 'matrix-cell';
       cell.id = `cell-${i}`;
+      cell.onclick = () => selectCell(i);
       
       const qNum = startQuestionNum + i;
-      cell.innerHTML = `<span class="q-num">${qNum}.</span> <span class="ans"></span>`;
+      cell.innerHTML = `
+        <div class="cell-left">
+          <span class="q-num">${qNum}.</span>
+          <span class="ans"></span>
+        </div>
+        <span class="time-tag"></span>
+      `;
       grid.appendChild(cell);
     }
 
-    // Reset scroll position to top
+    highlightSelected();
+    resetQuestionTimer();
     document.getElementById('viewport').scrollTop = 0;
   }
 
-  function submitAnswer(optionIndex) {
-    if (currentAnswerIndex >= TOTAL_CELLS) {
-      alert("Reached maximum capacity of 100 answers!");
-      return;
+  function updateFormat() {
+    currentFormat = document.getElementById('formatSelect').value;
+    const labels = optionSets[currentFormat];
+    for (let i = 0; i < 4; i++) {
+      document.getElementById(`btn${i+1}`).innerText = labels[i];
     }
+  }
+
+  function selectCell(index) {
+    selectedIndex = index;
+    highlightSelected();
+    resetQuestionTimer();
+  }
+
+  function highlightSelected() {
+    document.querySelectorAll('.matrix-cell').forEach(c => c.classList.remove('selected'));
+    const cell = document.getElementById(`cell-${selectedIndex}`);
+    if (cell) {
+      cell.classList.add('selected');
+    }
+  }
+
+  function submitAnswer(optionIndex) {
+    if (selectedIndex < 0 || selectedIndex >= TOTAL_CELLS) return;
 
     const selectedOption = optionSets[currentFormat][optionIndex];
-    const cell = document.getElementById(`cell-${currentAnswerIndex}`);
+    const cell = document.getElementById(`cell-${selectedIndex}`);
     
-    // Add answer styling
     cell.classList.add('filled');
     cell.querySelector('.ans').innerText = selectedOption;
 
-    currentAnswerIndex++;
-
-    // Auto-scroll screen downwards once answers go beyond 50 (Row 10+)
-    if (currentAnswerIndex > 50) {
-      const viewport = document.getElementById('viewport');
-      viewport.scrollTop = viewport.scrollHeight;
+    // Record time taken if timer is enabled
+    if (document.getElementById('timerToggle').checked && startTime) {
+      const elapsedSec = Math.floor((Date.now() - startTime) / 1000);
+      cellTimes[selectedIndex] = elapsedSec;
+      
+      const formatted = elapsedSec >= 60 
+        ? `${Math.floor(elapsedSec/60)}m${elapsedSec%60}s` 
+        : `${elapsedSec}s`;
+      
+      cell.querySelector('.time-tag').innerText = formatted;
     }
 
-    // Disable buttons if max questions reached
-    if (currentAnswerIndex === TOTAL_CELLS) {
-      for (let i = 1; i <= 4; i++) {
-        document.getElementById(`btn${i}`).disabled = true;
+    // Auto-advance to next cell
+    if (selectedIndex < TOTAL_CELLS - 1) {
+      selectedIndex++;
+      highlightSelected();
+      
+      // Auto scroll if moving past visible 50 cells
+      if (selectedIndex >= 50) {
+        const viewport = document.getElementById('viewport');
+        viewport.scrollTop = (Math.floor(selectedIndex / 5) - 9) * 40;
       }
     }
+
+    resetQuestionTimer();
   }
 
-  function undoLastAnswer() {
-    if (currentAnswerIndex === 0) return; // Nothing to undo
-
-    currentAnswerIndex--;
-
-    const cell = document.getElementById(`cell-${currentAnswerIndex}`);
-    cell.classList.remove('filled');
-    cell.querySelector('.ans').innerText = '';
-
-    // Re-enable answer buttons if they were disabled at 100 limit
-    for (let i = 1; i <= 4; i++) {
-      document.getElementById(`btn${i}`).disabled = false;
+  function clearSelectedCell() {
+    const cell = document.getElementById(`cell-${selectedIndex}`);
+    if (cell) {
+      cell.classList.remove('filled');
+      cell.querySelector('.ans').innerText = '';
+      cell.querySelector('.time-tag').innerText = '';
+      cellTimes[selectedIndex] = null;
     }
+    resetQuestionTimer();
+  }
 
-    // Scroll back up if undoing brings us back into the top 50
-    if (currentAnswerIndex <= 50) {
-      const viewport = document.getElementById('viewport');
-      viewport.scrollTop = 0;
+  /* Timer Logic */
+  function toggleTimer() {
+    const isChecked = document.getElementById('timerToggle').checked;
+    const display = document.getElementById('timerDisplay');
+    
+    if (isChecked) {
+      display.classList.add('active');
+      resetQuestionTimer();
+    } else {
+      display.classList.remove('active');
+      clearInterval(timerInterval);
     }
   }
 
-  // Allow keyboard shortcuts (A, B, C, D / 1, 2, 3, 4, Backspace, or Z for Undo)
+  function resetQuestionTimer() {
+    clearInterval(timerInterval);
+    if (!document.getElementById('timerToggle').checked) return;
+
+    startTime = Date.now();
+    const timeElem = document.getElementById('timeElapsed');
+    timeElem.innerText = "0s";
+
+    timerInterval = setInterval(() => {
+      const seconds = Math.floor((Date.now() - startTime) / 1000);
+      if (seconds >= 60) {
+        timeElem.innerText = `${Math.floor(seconds / 60)}m ${seconds % 60}s`;
+      } else {
+        timeElem.innerText = `${seconds}s`;
+      }
+    }, 1000);
+  }
+
+  // Keyboard controls
   document.addEventListener('keydown', (e) => {
-    if (e.key === 'Backspace' || e.key === 'z' || e.key === 'Z') {
-      undoLastAnswer();
+    if (e.key === 'Backspace') {
+      clearSelectedCell();
       return;
     }
 
@@ -374,7 +496,7 @@
     }
   });
 
-  // Initialize on load
+  // Init
   initializeTally();
 </script>
 
