@@ -1,0 +1,322 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Answer Tallying Matrix</title>
+  <style>
+    :root {
+      --bg-color: #0f172a;
+      --card-bg: #1e293b;
+      --accent-color: #38bdf8;
+      --text-color: #f8fafc;
+      --cell-bg: #0f172a;
+      --cell-border: #334155;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+
+    body {
+      background-color: var(--bg-color);
+      color: var(--text-color);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      padding: 20px;
+    }
+
+    .container {
+      background-color: var(--card-bg);
+      border-radius: 16px;
+      padding: 24px;
+      width: 100%;
+      max-width: 650px;
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5);
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+
+    h1 {
+      text-align: center;
+      font-size: 1.5rem;
+      color: var(--accent-color);
+    }
+
+    /* Setup Bar */
+    .config-panel {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      background: rgba(0, 0, 0, 0.2);
+      padding: 16px;
+      border-radius: 10px;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .config-group {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    label {
+      font-size: 0.9rem;
+      color: #94a3b8;
+    }
+
+    select, input {
+      background-color: var(--cell-bg);
+      color: var(--text-color);
+      border: 1px solid var(--cell-border);
+      padding: 8px 12px;
+      border-radius: 6px;
+      font-size: 0.95rem;
+      outline: none;
+    }
+
+    select:focus, input:focus {
+      border-color: var(--accent-color);
+    }
+
+    .start-btn {
+      background-color: #10b981;
+      color: white;
+      border: none;
+      padding: 8px 16px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-weight: bold;
+      transition: background 0.2s;
+    }
+
+    .start-btn:hover {
+      background-color: #059669;
+    }
+
+    /* 10x5 Matrix Display */
+    .matrix-viewport {
+      height: 380px; /* Fits exactly 10 rows before scrolling */
+      overflow-y: auto;
+      border: 2px solid var(--cell-border);
+      border-radius: 8px;
+      background-color: var(--cell-bg);
+      padding: 8px;
+    }
+
+    .matrix-grid {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 6px;
+    }
+
+    .matrix-cell {
+      background-color: rgba(255, 255, 255, 0.03);
+      border: 1px solid rgba(255, 255, 255, 0.07);
+      border-radius: 4px;
+      height: 32px;
+      display: flex;
+      align-items: center;
+      padding: 0 8px;
+      font-size: 0.85rem;
+      font-family: monospace;
+      color: #64748b;
+    }
+
+    .matrix-cell.filled {
+      border-color: var(--accent-color);
+      color: var(--text-color);
+      background-color: rgba(56, 189, 248, 0.1);
+    }
+
+    .matrix-cell .q-num {
+      font-weight: bold;
+      margin-right: 4px;
+      color: #94a3b8;
+    }
+
+    .matrix-cell .ans {
+      color: #f59e0b;
+      font-weight: bold;
+    }
+
+    /* Controls Section */
+    .buttons-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 12px;
+    }
+
+    .tally-btn {
+      background-color: #3b82f6;
+      color: white;
+      border: none;
+      padding: 16px;
+      font-size: 1.25rem;
+      font-weight: bold;
+      border-radius: 8px;
+      cursor: pointer;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
+      transition: transform 0.1s, background-color 0.2s;
+    }
+
+    .tally-btn:active {
+      transform: scale(0.95);
+    }
+
+    .tally-btn:disabled {
+      background-color: #334155;
+      cursor: not-allowed;
+      opacity: 0.5;
+    }
+
+    /* Scrollbar Styling */
+    .matrix-viewport::-webkit-scrollbar {
+      width: 8px;
+    }
+    .matrix-viewport::-webkit-scrollbar-track {
+      background: var(--cell-bg);
+    }
+    .matrix-viewport::-webkit-scrollbar-thumb {
+      background: var(--cell-border);
+      border-radius: 4px;
+    }
+  </style>
+</head>
+<body>
+
+<div class="container">
+  <h1>Answer Tallyer Matrix</h1>
+
+  <!-- Configuration Bar -->
+  <div class="config-panel">
+    <div class="config-group">
+      <label for="formatSelect">Format:</label>
+      <select id="formatSelect">
+        <option value="ABCD">A, B, C, D</option>
+        <option value="1234">1, 2, 3, 4</option>
+      </select>
+    </div>
+
+    <div class="config-group">
+      <label for="startQ">Start Q#:</label>
+      <input type="number" id="startQ" value="6" min="1" style="width: 70px;">
+    </div>
+
+    <button class="start-btn" onclick="initializeTally()">Start / Reset</button>
+  </div>
+
+  <!-- 10x5 Matrix Screen (Scrolls up to 100 entries) -->
+  <div class="matrix-viewport" id="viewport">
+    <div class="matrix-grid" id="matrixGrid"></div>
+  </div>
+
+  <!-- Lower Input Buttons -->
+  <div class="buttons-grid">
+    <button class="tally-btn" id="btn1" onclick="submitAnswer(0)" disabled>A</button>
+    <button class="tally-btn" id="btn2" onclick="submitAnswer(1)" disabled>B</button>
+    <button class="tally-btn" id="btn3" onclick="submitAnswer(2)" disabled>C</button>
+    <button class="tally-btn" id="btn4" onclick="submitAnswer(3)" disabled>D</button>
+  </div>
+</div>
+
+<script>
+  let currentFormat = "ABCD";
+  let startQuestionNum = 6;
+  let currentAnswerIndex = 0;
+  const TOTAL_CELLS = 100; // Total capacity (2 full screens of 50)
+  
+  const optionSets = {
+    "ABCD": ["A", "B", "C", "D"],
+    "1234": ["1", "2", "3", "4"]
+  };
+
+  function initializeTally() {
+    currentFormat = document.getElementById('formatSelect').value;
+    startQuestionNum = parseInt(document.getElementById('startQ').value) || 1;
+    currentAnswerIndex = 0;
+
+    // Update button labels according to selected format
+    const labels = optionSets[currentFormat];
+    for (let i = 0; i < 4; i++) {
+      const btn = document.getElementById(`btn${i+1}`);
+      btn.innerText = labels[i];
+      btn.disabled = false;
+    }
+
+    // Build the 100-cell matrix grid
+    const grid = document.getElementById('matrixGrid');
+    grid.innerHTML = '';
+
+    for (let i = 0; i < TOTAL_CELLS; i++) {
+      const cell = document.createElement('div');
+      cell.className = 'matrix-cell';
+      cell.id = `cell-${i}`;
+      
+      const qNum = startQuestionNum + i;
+      cell.innerHTML = `<span class="q-num">${qNum}.</span> <span class="ans"></span>`;
+      grid.appendChild(cell);
+    }
+
+    // Reset scroll position to top
+    document.getElementById('viewport').scrollTop = 0;
+  }
+
+  function submitAnswer(optionIndex) {
+    if (currentAnswerIndex >= TOTAL_CELLS) {
+      alert("Reached maximum capacity of 100 answers!");
+      return;
+    }
+
+    const selectedOption = optionSets[currentFormat][optionIndex];
+    const cell = document.getElementById(`cell-${currentAnswerIndex}`);
+    
+    // Add answer styling
+    cell.classList.add('filled');
+    cell.querySelector('.ans').innerText = selectedOption;
+
+    currentAnswerIndex++;
+
+    // Auto-scroll screen downwards once answers go beyond 50 (Row 10+)
+    if (currentAnswerIndex > 50) {
+      const viewport = document.getElementById('viewport');
+      viewport.scrollTop = viewport.scrollHeight;
+    }
+
+    // Disable buttons if max questions reached
+    if (currentAnswerIndex === TOTAL_CELLS) {
+      for (let i = 1; i <= 4; i++) {
+        document.getElementById(`btn${i}`).disabled = true;
+      }
+    }
+  }
+
+  // Allow keyboard shortcuts (A, B, C, D or 1, 2, 3, 4)
+  document.addEventListener('keydown', (e) => {
+    const key = e.key.toUpperCase();
+    if (currentFormat === "ABCD") {
+      if (key === 'A') submitAnswer(0);
+      if (key === 'B') submitAnswer(1);
+      if (key === 'C') submitAnswer(2);
+      if (key === 'D') submitAnswer(3);
+    } else if (currentFormat === "1234") {
+      if (key === '1') submitAnswer(0);
+      if (key === '2') submitAnswer(1);
+      if (key === '3') submitAnswer(2);
+      if (key === '4') submitAnswer(3);
+    }
+  });
+
+  // Initialize on load
+  initializeTally();
+</script>
+
+</body>
+</html>
